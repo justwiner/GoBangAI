@@ -1,3 +1,4 @@
+const {IThink} = require('./service/index')
 const express = require('express')
 const app = express()
 
@@ -25,8 +26,7 @@ app.get("/", function (req, res) {
 })
 
 app.post("/game", function (req, res) {
-    console.log(req.body)
-    res.send(json)
+    res.send(IThink(req.body))
 })
 
 app.listen(5438, function () {
