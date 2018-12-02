@@ -19,7 +19,6 @@ function IThink ({ chessRecords, spec, array }) {
             mulY
         }
     }
-    console.log(result)
     return result
 }
 
