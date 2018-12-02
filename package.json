@@ -1,0 +1,11 @@
+{
+  "name": "GoBangAI-001",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/justwiner/GoBangAI-001.git",
+  "author": "justwiner <392110917@qq.com>",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
+}
