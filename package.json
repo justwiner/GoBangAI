@@ -6,6 +6,7 @@
   "author": "justwiner <392110917@qq.com>",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.16.4"
+    "express": "^4.16.4",
+    "random-js": "^1.0.8"
   }
 }

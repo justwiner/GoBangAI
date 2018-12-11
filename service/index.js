@@ -1,4 +1,4 @@
-function IThink ({ chessRecords, spec, array }) {
+function IThink ({ chessRecords, spec, array, role }) {
     let mulX = ""
     let mulY = ""
     let ifExist = false
