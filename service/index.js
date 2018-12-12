@@ -1,3 +1,7 @@
+const think = require('./negamax')
+const board = require('./board')
+const config = require('./util/config')
+
 function IThink ({ chessRecords, spec, array, role }) {
     let mulX = ""
     let mulY = ""
@@ -19,6 +23,10 @@ function IThink ({ chessRecords, spec, array, role }) {
             mulY
         }
     }
+    board.init(array)
+    debugger;
+    let result_1 = think(undefined, config.searchDeep)
+    console.log(result_1)
     return result
 }
 

@@ -91,6 +91,17 @@ class Board {
 
         this.initScore()
 
+        // 对已有棋盘进行步数存储与评分
+        if (sizeOrBoard.length) {
+            for (let i = 0; i < size; i ++) {
+                for (let j = 0 ; j < size; j ++) {
+                    if (sizeOrBoard[i][j] !== 0) {
+                        this.put([i, j], sizeOrBoard[i][j]);
+                        this.updateScore([i, j, sizeOrBoard[i][j]])
+                    }
+                }
+            }
+        }
     }
 
     initScore() {
@@ -324,7 +335,7 @@ class Board {
                 i -= 2
             }
 
-            let i = this.currentSteps.length - 2
+            i = this.currentSteps.length - 2
             while (i >= 0) {
                 let p = this.currentSteps[i]
                 if (role === R.com && p.scoreCom >= S.THREE ||

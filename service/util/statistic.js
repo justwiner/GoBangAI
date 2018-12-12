@@ -1,4 +1,4 @@
-import array from "./arrary.js"
+const array = require('./array')
 
 class Statistic {
 

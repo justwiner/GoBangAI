@@ -70,7 +70,7 @@ function maxMinSearch(deep, alpha, beta, role, step, steps, spread) {
     count++
     // 搜索到底 或者已经胜利
     // 注意这里是小于0，而不是1，因为本次直接返回结果并没有下一步棋
-    if (deep <= 0 || math.greatOrEqualThan(_e, T.FIVE) || math.littleOrEqualThan(_e, -T.FIVE)) {
+    if (deep <= 0 || math.greatOrEqualThan(_e, SCORE.FIVE) || math.littleOrEqualThan(_e, -SCORE.FIVE)) {
         //// 经过测试，把算杀放在对子节点的搜索之后，比放在前面速度更快一些。
         //// vcf
         //// 自己没有形成活四，对面也没有形成活四，那么先尝试VCF
@@ -89,7 +89,7 @@ function maxMinSearch(deep, alpha, beta, role, step, steps, spread) {
         //} // vct
         //// 自己没有形成活三，对面也没有高于活三的棋型，那么尝试VCT
         //if(math.littleThan(_e, SCORE.THREE*2) && math.greatThan(_e, SCORE.THREE * -2)) {
-        //  var mate = vcx.vct(role, vcxDeep)
+        //  let mate = vcx.vct(role, vcxDeep)
         //  if(mate) {
         //    config.debug && console.log('vct success')
         //    v = {
@@ -104,7 +104,7 @@ function maxMinSearch(deep, alpha, beta, role, step, steps, spread) {
         return leaf
     }
 
-    var best = {
+    let best = {
         score: MIN,
         step: step,
         steps: steps
@@ -127,7 +127,7 @@ function maxMinSearch(deep, alpha, beta, role, step, steps, spread) {
 
         if (_spread < config.spreadLimit) {
             // 冲四延伸
-            if ((role == R.com && p.scoreHum >= SCORE.FIVE) || (role == R.hum && p.scoreCom >= SCORE.FIVE)) {
+            if ((role == Role.com && p.scoreHum >= SCORE.FIVE) || (role == Role.hum && p.scoreCom >= SCORE.FIVE)) {
                 // _deep = deep+1
                 _deep += 2
                 _spread++
@@ -141,7 +141,7 @@ function maxMinSearch(deep, alpha, beta, role, step, steps, spread) {
 
         let _steps = steps.slice(0)
         _steps.push(p)
-        let v = maxMinSearch(_deep, -beta, -alpha, R.reverse(role), step + 1, _steps, _spread)
+        let v = maxMinSearch(_deep, -beta, -alpha, Role.reverse(role), step + 1, _steps, _spread)
         v.score *= -1
         board.remove(p)
 
@@ -181,7 +181,7 @@ function negamax(candidates, role, deep, alpha, beta) {
         let p = candidates[i]
         board.put(p, role)
         let steps = [p]
-        let v = maxMinSearch(deep - 1, -beta, -alpha, R.reverse(role), 1, steps.slice(0), 0)
+        let v = maxMinSearch(deep - 1, -beta, -alpha, Role.reverse(role), 1, steps.slice(0), 0)
         v.score *= -1
         alpha = Math.max(alpha, v.score)
         board.remove(p)
@@ -212,11 +212,11 @@ function deeping(candidates, role, deep) {
     Cache = {} // 每次开始迭代的时候清空缓存。这里缓存的主要目的是在每一次的时候加快搜索，而不是长期存储。事实证明这样的清空方式对搜索速度的影响非常小（小于10%)
 
     let bestScore = 0
-    for (var i = 2; i <= deep; i += 2) {
+    for (let i = 2; i <= deep; i += 2) {
         bestScore = negamax(candidates, role, i, MIN, MAX)
         //// 每次迭代剔除必败点，直到没有必败点或者只剩最后一个点
         //// 实际上，由于必败点几乎都会被AB剪枝剪掉，因此这段代码几乎不会生效
-        //var newCandidates = candidates.filter(function (d) {
+        //let newCandidates = candidates.filter(function (d) {
         //  return !d.abcut
         //})
         //candidates = newCandidates.length ? newCandidates : [candidates[0]] // 必败了，随便走走
@@ -271,6 +271,7 @@ function deepAll(role, deep) {
     role = role || Role.com
     deep = deep === undefined ? config.searchDeep : deep
     const candidates = board.gen(role)
+    debugger;
     return deeping(candidates, role, deep)
 }
 

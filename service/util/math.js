@@ -1,4 +1,4 @@
-import S from './score.js'
+const S = require('./scores')
 
 let threshold = 1.15
 
