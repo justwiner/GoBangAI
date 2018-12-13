@@ -3,31 +3,15 @@ const board = require('./board')
 const config = require('./util/config')
 
 function IThink ({ chessRecords, spec, array, role }) {
-    let mulX = ""
-    let mulY = ""
-    let ifExist = false
-    while (!ifExist) {
-        mulX = Math.floor(Math.random() * (spec + 1))
-        mulY = Math.floor(Math.random() * (spec + 1))
-        ifExist = pointIfExist (chessRecords, {
-            index: {
-                mulX, mulY
-            }
-        })
-        ifExist = !ifExist
-    }
-    let result = {}
-    result = {
+    
+    board.init(array)
+    let result = think(undefined, config.searchDeep)
+    return {
         index: {
-            mulX,
-            mulY
+            mulX: result[0],
+            mulY: result[1]
         }
     }
-    board.init(array)
-    debugger;
-    let result_1 = think(undefined, config.searchDeep)
-    console.log(result_1)
-    return result
 }
 
 // 模拟AI落子辅助函数-此落点是否存在

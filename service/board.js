@@ -298,7 +298,7 @@ class Board {
         config.log && console.log('star: ' + (count / total * 100).toFixed(2) + '%, ' + count + '/' + total)
     }
     gen(role, onlyThrees, starSpread) {
-        if (this.count <= 0) return [7, 7]
+        if (this.count <= 0) return [[7, 7]]
         let fives = []
         let comfours = []
         let humfours = []

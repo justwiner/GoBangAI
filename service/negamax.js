@@ -271,7 +271,6 @@ function deepAll(role, deep) {
     role = role || Role.com
     deep = deep === undefined ? config.searchDeep : deep
     const candidates = board.gen(role)
-    debugger;
     return deeping(candidates, role, deep)
 }
 
