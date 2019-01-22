@@ -8,8 +8,8 @@ function IThink ({ chessRecords, spec, array, role }) {
     let result = think(undefined, config.searchDeep)
     return {
         index: {
-            mulX: result[0],
-            mulY: result[1]
+            mulX: result[1],
+            mulY: result[0]
         }
     }
 }
