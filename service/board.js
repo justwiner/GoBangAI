@@ -39,6 +39,14 @@ function starTo(point, points) {
 }
 
 class Board {
+
+    /**
+     * 初始化棋盘对象
+     * 传size，则初始化空的棋盘
+     * 穿board（二维数组），则根据二维数组初始化棋盘
+     * @param {*} sizeOrBoard
+     * @memberof Board
+     */
     init(sizeOrBoard) {
         this.evaluateCache = {}
         this.currentSteps = [] // 当前一次思考的步骤
