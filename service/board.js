@@ -57,13 +57,23 @@ class Board {
         this._last = [false, false] // 记录最后一步
         this.count = 0; // chessman count
         let size = 0;
+        /**
+         * 传入的是一个二维数组
+         * 则根据二维数组初始化棋盘
+         * 并统计已落子的数目
+         */
         if (sizeOrBoard.length) {
             this.board = sizeOrBoard
             size = this.board.length
             for (let i = 0; i < this.board.length; i++){
+                // 统计每一行落子信息大于0（即已落子）的数目
                 this.count += this.board[i].filter(d => d > 0).length
             }
         } else {
+            /**
+             * 传入的是数字
+             * 则初始化空的二维数组，并设置到棋盘对象中
+             */
             size = sizeOrBoard
             this.board = []
             for (let i = 0; i < size; i++) {
