@@ -1,14 +1,15 @@
 exports = module.exports = {
-    create: function (w, h) {
-      var r = []
-      for(var i=0;i<w;i++) {
-        var row = new Array()
-        for(var j=0;j<h;j++) {
-          row.push(0)
-        }
-        r.push(row)
+  // 创建一个值全为0的二维数组
+  create: function (w, h) {
+    let emptyArray = []
+    let row = []
+    for (let i = 0; i < w; i++) {
+      row = []
+      for (var j = 0; j < h; j++) {
+        row.push(0)
       }
-      return r
+      emptyArray.push(row)
     }
+    return emptyArray
   }
-  
+}
