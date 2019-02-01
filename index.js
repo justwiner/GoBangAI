@@ -25,10 +25,16 @@ app.get("/", function (req, res) {
     res.send(json)
 })
 
+// 定义五子棋AI请求路径
 app.post("/game", function (req, res) {
+    /**
+     * IThink - 五子棋AI主方法
+     * 返回值为计算的落子结果
+     */
     res.send(IThink(req.body))
 })
 
+// 定义服务器端口
 app.listen(5438, function () {
     console.log("启动服务 http://localhost:5438 ")
 })
