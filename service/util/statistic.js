@@ -1,18 +1,18 @@
 const array = require('./array')
 
 class Statistic {
-
+  // 初始化空的二维数组
   init (size) {
     this.table = array.create(size, size);
   }
 
   print (candidates) {
     console.log(this.table.map(function (r) { return r.map(i=>parseInt(Math.sqrt(i/10000))).join(',') }))
-    var max = 0;
-    var p;
-    for (var i=0; i<candidates.length; i++) {
-      var c = candidates[i];
-      var s = this.table[c[0]][c[1]];
+    let max = 0;
+    let p;
+    for (let i=0; i<candidates.length; i++) {
+      let c = candidates[i];
+      let s = this.table[c[0]][c[1]];
       if (s > max) {
         max = s;
         p = [c[0], c[1]];
