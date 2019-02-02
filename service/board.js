@@ -264,6 +264,7 @@ class Board {
 
     //棋面估分
     //这里只算当前分，而不是在空位下一步之后的分
+    // 评估函数
     evaluate(role) {
 
         //这里加了缓存，但是并没有提升速度
@@ -296,24 +297,21 @@ class Board {
 
     }
 
-    //启发函数
-    /*
+    log() {
+        config.log && console.log('star: ' + (count / total * 100).toFixed(2) + '%, ' + count + '/' + total)
+    }
+    
+    /**
+     * 启发函数
      * 变量starBread的用途是用来进行米子计算
      * 所谓米子计算，只是，如果第一步尝试了一个位置A，那么接下来尝试的位置有两种情况：
      * 1: 大于等于活三的位置
      * 2: 在A的米子位置上
      * 注意只有对小于活三的棋才进行starSpread优化
-     */
-
-    /*
+     * 
      * gen 函数的排序是非常重要的，因为好的排序能极大提升AB剪枝的效率。
      * 而对结果的排序，是要根据role来的
      */
-
-
-    log() {
-        config.log && console.log('star: ' + (count / total * 100).toFixed(2) + '%, ' + count + '/' + total)
-    }
     gen(role, onlyThrees, starSpread) {
         if (this.count <= 0) return [[7, 7]]
         let fives = []
