@@ -39,7 +39,6 @@ function starTo(point, points) {
 }
 
 class Board {
-
     /**
      * 初始化棋盘对象
      * 传size，则初始化空的棋盘

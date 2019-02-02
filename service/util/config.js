@@ -1,3 +1,6 @@
+/**
+ * 配置文件
+ */
 exports = module.exports = {
     opening: true, // 使用开局库
     searchDeep: 8,  //搜索深度
