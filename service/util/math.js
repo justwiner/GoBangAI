@@ -1,5 +1,6 @@
 const S = require('./scores')
 
+// 阈值
 let threshold = 1.15
 
 let equal = function(a, b) {
@@ -21,8 +22,8 @@ let littleOrEqualThan = function(a, b) {
 }
 
 let containPoint = function (arrays, p) {
-  for (var i=0;i<arrays.length;i++) {
-    var a = arrays[i]
+  for (let i=0;i<arrays.length;i++) {
+    let a = arrays[i]
     if (a[0] === p[0] && a[1] === p[1]) return true
   }
   return false
@@ -33,8 +34,8 @@ let pointEqual = function (a, b) {
 }
 
 let round = function (score) {
-  var neg = score < 0 ? -1 : 1
-  var abs = Math.abs(score)
+  let neg = score < 0 ? -1 : 1
+  let abs = Math.abs(score)
   if (abs <= S.ONE / 2) return 0
   if (abs <= S.TWO / 2 && abs > S.ONE / 2) return neg * S.ONE
   if (abs <= S.THREE / 2 && abs > S.TWO / 2) return neg * S.TWO
