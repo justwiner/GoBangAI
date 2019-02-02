@@ -1,3 +1,8 @@
+/** 
+ * 定义角色
+ * 电脑： 1
+ * 真人： 2
+ */
 exports = module.exports = {
     com: 1,
     hum: 2,
