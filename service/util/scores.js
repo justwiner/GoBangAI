@@ -7,15 +7,15 @@
 // 给单个棋型打分
 
 exports = module.exports = {
-    ONE: 10,
-    TWO: 100,
-    THREE: 1000,
-    FOUR: 100000,
-    FIVE: 10000000,
-    BLOCKED_ONE: 1,
-    BLOCKED_TWO: 10,
-    BLOCKED_THREE: 100,
-    BLOCKED_FOUR: 10000
+    ONE: 10, // 活一
+    TWO: 100, // 活二
+    THREE: 1000, // 活三
+    FOUR: 100000, // 活四
+    FIVE: 10000000, // 连五
+    BLOCKED_ONE: 1, // 冲一
+    BLOCKED_TWO: 10, // 冲二
+    BLOCKED_THREE: 100, // 冲三
+    BLOCKED_FOUR: 10000 // 冲四
   }
   
   // 总分数
