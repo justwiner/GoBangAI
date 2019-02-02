@@ -8,7 +8,7 @@ let Zobrist = function (size) {
 Zobrist.prototype.init = function () {
     this.com = [];
     this.hum = [];
-    for (var i = 0; i < this.size * this.size; i++) {
+    for (let i = 0; i < this.size * this.size; i++) {
         this.com.push(this._rand());
         this.hum.push(this._rand());
     }
