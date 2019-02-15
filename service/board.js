@@ -9,13 +9,21 @@ const config = require('./util/config')
 let count = 0
 let total = 0
 
+/**
+ * 根据棋型，得到相应的分数
+ *
+ * @param {*} 
+ * @returns 分数
+*/
 function fixScore(type) {
+    // 棋型分数小于活四，大于等于冲四
     if (type < S.FOUR && type >= S.BLOCKED_FOUR) {
-
+        // 如果当前分数只够单独冲四，并且不足以构成冲四且活三的杀招
         if (type >= S.BLOCKED_FOUR && type < (S.BLOCKED_FOUR + S.THREE)) {
-            //单独冲四，意义不大
+            //单独冲四，意义不大，则选择活三
             return S.THREE
         } else if (type >= S.BLOCKED_FOUR + S.THREE && type < S.BLOCKED_FOUR * 2) {
+            // 当前棋子可以形成冲四与活三，但不能形成双冲四
             return S.FOUR //冲四活三，比双三分高，相当于自己形成活四
         } else {
             //双冲四 比活四分数也高
@@ -273,7 +281,7 @@ class Board {
         // 这里都是用正整数初始化的，所以初始值是0
         this.comMaxScore = 0
         this.humMaxScore = 0
-
+        // 拿取到当前棋盘的引用
         let board = this.board
 
         //遍历出最高分，开销不大
