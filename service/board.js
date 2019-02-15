@@ -285,6 +285,7 @@ class Board {
         let board = this.board
 
         //遍历出最高分，开销不大
+        // L：得到当前棋盘，我方和敌方的总分
         for (let i = 0; i < board.length; i++) {
             for (let j = 0; j < board[i].length; j++) {
                 if (board[i][j] == R.com) {
