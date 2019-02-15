@@ -312,6 +312,7 @@ class Board {
      * gen 函数的排序是非常重要的，因为好的排序能极大提升AB剪枝的效率。
      * 而对结果的排序，是要根据role来的
      */
+    
     gen(role, onlyThrees, starSpread) {
         if (this.count <= 0) return [[7, 7]]
         let fives = []

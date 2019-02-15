@@ -2,6 +2,7 @@ const R = require('./role')
 const Random = require("random-js")
 
 let Zobrist = function (size) {
+    // 设置棋盘尺寸
     this.size = size || 15;
 }
 
