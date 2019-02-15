@@ -262,8 +262,8 @@ class Board {
         console.log("steps:" + this.allSteps.map((d) => '[' + d[0] + ',' + d[1] + ']').join(','))
     }
 
-    //棋面估分
-    //这里只算当前分，而不是在空位下一步之后的分
+    // 棋面估分
+    // 这里只算当前分，而不是在空位下一步之后的分
     // 评估函数
     evaluate(role) {
 

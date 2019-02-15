@@ -59,7 +59,7 @@ function maxMinSearch(deep, alpha, beta, role, step, steps, spread) {
             }
         }
     }
-
+    // 此处对当前棋盘，针对当前角色进行估分
     let _e = board.evaluate(role)
 
     let leaf = {
