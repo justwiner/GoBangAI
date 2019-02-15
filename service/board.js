@@ -270,20 +270,19 @@ class Board {
         console.log("steps:" + this.allSteps.map((d) => '[' + d[0] + ',' + d[1] + ']').join(','))
     }
 
-    // 棋面估分
-    // 这里只算当前分，而不是在空位下一步之后的分
-    // 评估函数
+    /**
+     * 评估函数
+     * 这里只算当前分，而不是在空位下一步之后的分
+     * @param {*} role
+     * @returns
+     * @memberof Board
+     */
     evaluate(role) {
-
-        //这里加了缓存，但是并没有提升速度
-        // if(config.cache && this.evaluateCache[this.zobrist.code]) return this.evaluateCache[this.zobrist.code]
-
         // 这里都是用正整数初始化的，所以初始值是0
         this.comMaxScore = 0
         this.humMaxScore = 0
         // 拿取到当前棋盘的引用
         let board = this.board
-
         //遍历出最高分，开销不大
         // L：得到当前棋盘，我方和敌方的总分
         for (let i = 0; i < board.length; i++) {
@@ -300,10 +299,7 @@ class Board {
         //this.comMaxScore = fixScore(this.comMaxScore)
         //this.humMaxScore = fixScore(this.humMaxScore)
         let result = (role == R.com ? 1 : -1) * (this.comMaxScore - this.humMaxScore)
-        // if (config.cache) this.evaluateCache[this.zobrist.code] = result
-
         return result
-
     }
 
     log() {
