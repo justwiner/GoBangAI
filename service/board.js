@@ -113,7 +113,7 @@ class Board {
                 array.create(size, size)
             ]
         ]
-
+        // 初始化下棋双方在整个棋盘中的每个位置的分数
         this.initScore()
 
         // 对已有棋盘进行步数存储与评分
@@ -129,6 +129,10 @@ class Board {
         }
     }
 
+    /**
+     * 初始化棋盘分数
+     * @memberof Board
+     */
     initScore() {
 
         let board = this.board
@@ -137,9 +141,16 @@ class Board {
             for (let j = 0; j < board[i].length; j++) {
                 // 空位，对双方都打分
                 if (board[i][j] == R.empty) {
-                    if (this.hasNeighbor(i, j, 2, 2)) { //必须是有邻居的才行
+                    /**
+                     * 必须是米子方向上有2个邻居的才打分
+                     * 否则默认0分
+                     */
+                    if (this.hasNeighbor(i, j, 2, 2)) {
+                        // 获取电脑在此落子点的分数
                         let cs = scorePoint(this, i, j, R.com)
+                        // 获取对方在此落子点的分数
                         let hs = scorePoint(this, i, j, R.hum)
+                        // 将分数分别保存下来
                         this.comScore[i][j] = cs
                         this.humScore[i][j] = hs
                     }
@@ -155,8 +166,13 @@ class Board {
         }
     }
 
-    // 只更新一个点附近的分数
-    // 参见 evaluate point 中的代码，为了优化性能，在更新分数的时候可以指定只更新某一个方向的分数
+    /**
+     * 只更新一个点附近的分数
+     * 因为某一个点的变化，只能影响以它为中心，半径为2的米子范围
+     * 参见 evaluate point 中的代码，为了优化性能，在更新分数的时候可以指定只更新某一个方向的分数
+     * @param {*} p 落子坐标
+     * @memberof Board
+     */
     updateScore(p) {
         let radius = 4,
             board = this.board,
@@ -165,11 +181,13 @@ class Board {
 
         function update(x, y, dir) {
             let role = self.board[x][y]
+            // 不是对手的棋子
             if (role !== R.reverse(R.com)) {
                 let cs = scorePoint(self, x, y, R.com, dir)
                 self.comScore[x][y] = cs
                 statistic.table[x][y] += cs
             } else self.comScore[x][y] = 0
+            // 是对手的棋子
             if (role !== R.reverse(R.hum)) {
                 let hs = scorePoint(self, x, y, R.hum, dir)
                 self.humScore[x][y] = hs
@@ -187,7 +205,7 @@ class Board {
             update(x, y, 0)
         }
 
-        // |
+        // 丨
         for (let i = -radius; i <= radius; i++) {
             let x = p[0] + i,
                 y = p[1]
@@ -217,16 +235,25 @@ class Board {
 
     }
 
-    //下子
+    /**
+     *下子
+     * @param {*} p 落子坐标
+     * @param {*} role 角色
+     * @memberof Board
+     */
     put(p, role) {
         p.role = role
         config.debug && console.log('put [' + p + ']' + ' ' + role)
         this.board[p[0]][p[1]] = role
         this.zobrist.go(p[0], p[1], role)
+        // 落子之后需要更新分数
         this.updateScore(p)
+        // 添加到总步数列表中
         this.allSteps.push(p)
+        // 添加到当前步数列表中
         this.currentSteps.push(p)
         this.stepsTail = []
+        // 棋子数目加 1
         this.count++
     }
 
@@ -511,6 +538,16 @@ class Board {
         return result
     }
 
+    /**
+     * 判断在米子方向上长度为distance，是否有count个邻居
+     * 
+     * @param {*} x 横坐标
+     * @param {*} y 纵坐标
+     * @param {*} distance 长度
+     * @param {*} count 
+     * @returns
+     * @memberof Board
+     */
     hasNeighbor(x, y, distance, count) {
         let board = this.board
         let len = board.length
@@ -519,9 +556,12 @@ class Board {
         let startY = y - distance
         let endY = y + distance
         for (let i = startX; i <= endX; i++) {
+            // 超出棋盘的点位不计算在内
             if (i < 0 || i >= len) continue
             for (let j = startY; j <= endY; j++) {
+                // 超出棋盘的点位不计算在内
                 if (j < 0 || j >= len) continue
+                // 目标点不计算在内
                 if (i == x && j == y) continue
                 if (board[i][j] != R.empty) {
                     count--
