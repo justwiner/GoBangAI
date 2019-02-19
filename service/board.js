@@ -58,7 +58,6 @@ class Board {
         this.evaluateCache = {}
         this.currentSteps = [] // 当前一次思考的步骤
         this.allSteps = []
-        this.stepsTail = []
         this.zobrist = zobrist
         zobrist.init() // 初始化zobrist置换表
         this._last = [false, false] // 记录最后一步
@@ -122,7 +121,7 @@ class Board {
                 for (let j = 0 ; j < size; j ++) {
                     if (sizeOrBoard[i][j] !== 0) {
                         this.put([i, j], sizeOrBoard[i][j]);
-                        this.updateScore([i, j, sizeOrBoard[i][j]])
+                        // this.updateScore([i, j, sizeOrBoard[i][j]])
                     }
                 }
             }
@@ -252,7 +251,6 @@ class Board {
         this.allSteps.push(p)
         // 添加到当前步数列表中
         this.currentSteps.push(p)
-        this.stepsTail = []
         // 棋子数目加 1
         this.count++
     }
@@ -268,30 +266,6 @@ class Board {
         this.currentSteps.pop()
         this.count--
     }
-
-    //悔棋
-    backward() {
-        if (this.allSteps.length < 2) return
-        let i = 0;
-        while (i < 2) {
-            let s = this.allSteps[this.allSteps.length - 1]
-            this.remove(s)
-            this.stepsTail.push(s)
-            i++
-        }
-    }
-
-    //前进
-    forward() {
-        if (this.stepsTail.length < 2) return
-        let i = 0;
-        while (i < 2) {
-            let s = this.stepsTail.pop()
-            this.put(s, s.role)
-            i++
-        }
-    }
-
 
     logSteps() {
         console.log("steps:" + this.allSteps.map((d) => '[' + d[0] + ',' + d[1] + ']').join(','))
