@@ -5,11 +5,16 @@
  */
 const R = require('./role')
 const score = require('./scores')
-/*
- * 表示在当前位置下一个棋子后的分数
+/**
+ * 表示当前位置棋子的分数
  * 为了性能考虑，增加了一个dir参数，如果没有传入则默认计算所有四个方向，如果传入值，则只计算其中一个方向的值
+ * @param {*} b
+ * @param {*} px
+ * @param {*} py
+ * @param {*} role
+ * @param {*} dir
+ * @returns
  */
-
 function scorePoint(b, px, py, role, dir) {
     let board = b.board
     let result = 0,
