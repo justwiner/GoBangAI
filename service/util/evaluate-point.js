@@ -8,11 +8,11 @@ const score = require('./scores')
 /**
  * 表示当前位置棋子的分数
  * 为了性能考虑，增加了一个dir参数，如果没有传入则默认计算所有四个方向，如果传入值，则只计算其中一个方向的值
- * @param {*} b
- * @param {*} px
- * @param {*} py
- * @param {*} role
- * @param {*} dir
+ * @param {*} b 棋盘对象
+ * @param {*} px 横坐标
+ * @param {*} py 纵坐标
+ * @param {*} role 角色
+ * @param {*} dir 指定方向
  * @returns
  */
 function scorePoint(b, px, py, role, dir) {
