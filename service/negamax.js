@@ -67,6 +67,7 @@ function maxMinSearch(deep, alpha, beta, role, step, steps, spread) {
         step: step,
         steps: steps
     }
+    // 思考次数+1（递归次数）
     count++
     // 搜索到底 或者已经胜利
     // 注意这里是小于0，而不是1，因为本次直接返回结果并没有下一步棋

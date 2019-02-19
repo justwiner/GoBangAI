@@ -60,9 +60,9 @@ class Board {
         this.allSteps = []
         this.stepsTail = []
         this.zobrist = zobrist
-        zobrist.init() // 注意重新初始化
+        zobrist.init() // 初始化zobrist置换表
         this._last = [false, false] // 记录最后一步
-        this.count = 0; // chessman count
+        this.count = 0; // 已落子数目
         let size = 0;
         /**
          * 传入的是一个二维数组
@@ -93,7 +93,7 @@ class Board {
         }
         statistic.init(size)
 
-        // 存储双方得分
+        // 初始化双方得分情况（二维数组方式）
         this.comScore = array.create(size, size)
         this.humScore = array.create(size, size)
 
