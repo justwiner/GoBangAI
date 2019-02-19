@@ -1,6 +1,6 @@
 const S = require('./util/scores')
 const R = require('./util/role')
-const statistic = require('./util/statistic')
+// const statistic = require('./util/statistic')
 const array = require('./util/array')
 const scorePoint = require('./util/evaluate-point')
 const zobrist = require('./util/zobrist')
@@ -90,7 +90,7 @@ class Board {
                 this.board.push(row)
             }
         }
-        statistic.init(size)
+        // statistic.init(size)
 
         // 初始化双方得分情况（二维数组方式）
         this.comScore = array.create(size, size)
@@ -184,13 +184,13 @@ class Board {
             if (role !== R.reverse(R.com)) {
                 let cs = scorePoint(self, x, y, R.com, dir)
                 self.comScore[x][y] = cs
-                statistic.table[x][y] += cs
+                // statistic.table[x][y] += cs
             } else self.comScore[x][y] = 0
             // 是对手的棋子
             if (role !== R.reverse(R.hum)) {
                 let hs = scorePoint(self, x, y, R.hum, dir)
                 self.humScore[x][y] = hs
-                statistic.table[x][y] += hs
+                // statistic.table[x][y] += hs
             } else self.humScore[x][y] = 0
 
         }
