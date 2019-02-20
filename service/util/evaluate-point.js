@@ -74,7 +74,6 @@ function scorePoint(b, px, py, role, dir) {
         }
 
         // 左方向从当前位置向左遍历， ← ←
-        // 注意：始终以最左侧最0点
         for (let i = py - 1; true; i--) {
             if (i < 0) {
                 block++

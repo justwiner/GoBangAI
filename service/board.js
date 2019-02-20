@@ -320,6 +320,7 @@ class Board {
      */
     
     gen(role, onlyThrees, starSpread) {
+        // 如果棋盘为空，则默认下最中间
         if (this.count <= 0) return [[7, 7]]
         let fives = []
         let comfours = []
@@ -345,7 +346,6 @@ class Board {
         // 只需要遍历以两个点为中心正方形。
         // 注意除非专门处理重叠区域，否则不要把两个正方形分开算，因为一般情况下这两个正方形会有相当大的重叠面积，别重复计算了
         if (starSpread && config.star) {
-
             let i = this.currentSteps.length - 1
             while (i >= 0) {
                 let p = this.currentSteps[i]
