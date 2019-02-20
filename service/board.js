@@ -6,7 +6,9 @@ const scorePoint = require('./util/evaluate-point')
 const zobrist = require('./util/zobrist')
 const config = require('./util/config')
 
+// 预选点位过滤数
 let count = 0
+// 预选点位总数
 let total = 0
 
 /**
@@ -329,6 +331,18 @@ class Board {
      * 而对结果的排序，是要根据role来的
      */
     
+    /**
+     * 1. 寻找进攻点与防守点
+     * 2. 遍历棋盘所有棋子，将与进攻点与防守点有关联（邻近，5步之内，或者在米子方向上）的棋子作为预选棋子
+     * 3. 预选棋子满足何种棋形就添加进何种列表中，全部满足则添加进邻居列表
+     * 4. 根据棋形列表，分析局势，返回相应了棋子列表
+     *
+     * @param {*} role 角色
+     * @param {*} onlyThrees 是否仅返回不低于双三的棋子列表
+     * @param {*} starSpread 是否进行优化
+     * @returns 
+     * @memberof Board
+     */
     gen(role, onlyThrees, starSpread) {
         // 如果棋盘为空，则默认下最中间的位置
         if (this.count <= 0) return [[7, 7]]
@@ -432,7 +446,7 @@ class Board {
                     p.scoreCom = scoreCom
                     p.score = maxScore
                     p.role = role
-
+                    // 预选点位总数+1
                     total++
                     /* 双星延伸，以提升性能
                      * 思路：每次下的子，只可能是自己进攻，或者防守对面（也就是对面进攻点）
@@ -446,6 +460,7 @@ class Board {
                             //star 路径不是很准，所以考虑冲四防守对手最后一步的棋
                         } else if (starTo(p, attackPoints) || starTo(p, defendPoints)) {}
                         else {
+                            // 预选点位过滤数+1
                             count++
                             continue
                         }
