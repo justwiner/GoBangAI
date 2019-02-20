@@ -209,7 +209,11 @@ function negamax(candidates, role, deep, alpha, beta) {
  * 比如我们搜索6层深度，那么我们先尝试2层，如果没有找到能赢的走法，再尝试4层，最后尝试6层。
  * 我们只尝试偶数层。因为奇数层其实是电脑比玩家多走了一步，忽视了玩家的防守，并不会额外找到更好的解法。
  * 
- * @param {*} candidates 启发式排序函数的结果
+ * 因为下棋永远是最快获胜即可，因此完全的深度遍历，再将路径最短的结果选出来，时间耗费太长
+ * 所以采用迭代加深，将搜索深度逐渐加深，保证了搜索出来的那个必然是最短路径！
+ * *提示：由于每一步棋的下一步棋有几十种可能，因此下一次增加深度的遍历的时间开销远比上一次的多！*
+ * *因此就算低深度的搜索重复，也远比一次性搜到底快*
+ * @param {*} candidates 启发式评估函数的结果
  * @param {*} role 角色
  * @param {*} deep 搜索深度
  * @returns
@@ -217,9 +221,18 @@ function negamax(candidates, role, deep, alpha, beta) {
 function deeping(candidates, role, deep) {
     start = (+new Date())
     let bestScore = 0
+    /**
+     * 层数类似与人脑思考的步数，
+     * *若当前是本服务器思考*，
+     * *那么第一层即是假想对手走的棋*，
+     * *第二层是假想己方走的棋*，
+     * *同理得出，偶数层为己方所思考的棋路*
+     */
+    // 传入的预选棋子列表的引用，在负极大值搜索之后，会赋予路径、分数与是否构成棋形的信息
     for (let i = 2; i <= deep; i += 2) {
+        // 拿取到搜索结果分数
         bestScore = negamax(candidates, role, i, MIN, MAX)
-
+        // 若此分数大于连五的分数，则不再搜索
         if (math.greatOrEqualThan(bestScore, SCORE.FIVE))
             break // 能赢了
     }
@@ -235,7 +248,7 @@ function deeping(candidates, role, deep) {
         return r
     })
 
-    // 排序
+    // 降序排序
     // 经过测试，这个如果放在上面的for循环中（就是每次迭代都排序），反而由于迭代深度太浅，排序不好反而会降低搜索速度。
     candidates.sort(function (a, b) {
         if (math.equal(a.score, b.score)) {
@@ -252,6 +265,7 @@ function deeping(candidates, role, deep) {
     })
 
     let result = candidates[0]
+
     result.min = Math.min.apply(Math, result.steps.map(d => d.score))
     config.log && console.log("选择节点：" + candidates[0] + ", 分数:" + result.score.toFixed(3) + ", 步数:" + result.step + ', 最小值：' + result.min)
     let time = (new Date() - start) / 1000
@@ -262,6 +276,7 @@ function deeping(candidates, role, deep) {
     board.log()
     // config.log && console.log("===============统计表===============")
     // config.debug && statistic.print(candidates)
+    
     return result
 }
 
