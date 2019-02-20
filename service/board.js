@@ -33,15 +33,25 @@ function fixScore(type) {
     return type
 }
 
+/**
+ * 判断母点位是否在子点位列表中，【所有】棋子的五步以内，或米子方向上
+ * 是，返回true
+ * 否，返回false
+ * @param {*} point 母点位，[行，列]
+ * @param {*} points 子点位列表 [[行，列],[行，列], ...]
+ * @returns
+ */
 function starTo(point, points) {
     if (!points || !points.length) return false
     const a = point
     for (let i = 0; i < points.length; i++) {
         // 距离必须在5步以内
         const b = points[i]
-        if ((Math.abs(a[0] - b[0]) > 4 || Math.abs(a[1] - b[1]) > 4)) return false
+        if ((Math.abs(a[0] - b[0]) > 4 || Math.abs(a[1] - b[1]) > 4))
+            return false
         // 必须在米子方向上
-        if (!(a[0] === b[0] || a[1] === b[1] || (Math.abs(a[0] - b[0]) === Math.abs(a[1] - b[1])))) return false
+        if (!(a[0] === b[0] || a[1] === b[1] || (Math.abs(a[0] - b[0]) === Math.abs(a[1] - b[1]))))
+            return false
     }
     return true
 }
@@ -320,7 +330,7 @@ class Board {
      */
     
     gen(role, onlyThrees, starSpread) {
-        // 如果棋盘为空，则默认下最中间
+        // 如果棋盘为空，则默认下最中间的位置
         if (this.count <= 0) return [[7, 7]]
         let fives = []
         let comfours = []
@@ -336,6 +346,7 @@ class Board {
         let neighbors = []
 
         let board = this.board
+        // 拿取到对手的角色
         let reverseRole = R.reverse(role)
         // 找到双方的最后进攻点
         const attackPoints = [] // 进攻点
@@ -346,36 +357,66 @@ class Board {
         // 只需要遍历以两个点为中心正方形。
         // 注意除非专门处理重叠区域，否则不要把两个正方形分开算，因为一般情况下这两个正方形会有相当大的重叠面积，别重复计算了
         if (starSpread && config.star) {
+            // 减一是因为最后一步棋，永远是对手下的
             let i = this.currentSteps.length - 1
             while (i >= 0) {
                 let p = this.currentSteps[i]
+                // 如果对手角色在此位置的分数大于活三的分数，则进行防守
                 if (reverseRole === R.com && p.scoreCom >= S.THREE ||
                     reverseRole === R.hum && p.scoreHum >= S.THREE) {
+                    // 将满足条件的点添加进防守点
                     defendPoints.push(p)
                     break
                 }
+                // 减二是因为这里只看对手的棋
                 i -= 2
             }
 
+            // 减二是因为最后一步棋的上一步棋，永远是自己下的
             i = this.currentSteps.length - 2
             while (i >= 0) {
                 let p = this.currentSteps[i]
+                // 如果自己在此位置的分数大于活三的分数，则进行进攻
                 if (role === R.com && p.scoreCom >= S.THREE ||
                     role === R.hum && p.scoreHum >= S.THREE) {
+                    // 将满足条件的点添加进进攻点
                     attackPoints.push(p)
                     break;
                 }
+                // 减二是因为这里只看自己的棋
                 i -= 2
             }
+            // 如果无进攻点 ！0 -> true
+            if (!attackPoints.length) {
+                // 将前两步棋中自己下的作为进攻点
+                attackPoints.push(
+                    this.currentSteps[0].role === role 
+                    ? this.currentSteps[0] 
+                    : this.currentSteps[1]
+                )
 
-            if (!attackPoints.length) attackPoints.push(this.currentSteps[0].role === role ? this.currentSteps[0] : this.currentSteps[1])
-            if (!defendPoints.length) defendPoints.push(this.currentSteps[0].role === reverseRole ? this.currentSteps[0] : this.currentSteps[1])
+            }
+            // 如果无防守点
+            if (!defendPoints.length) {
+                // 将前两布棋中对手下的作为防守点
+                defendPoints.push(
+                    this.currentSteps[0].role === reverseRole 
+                    ? this.currentSteps[0] 
+                    : this.currentSteps[1]
+                )
+            }
         }
-
+        /**
+         * 根据进攻点和防守点，
+         * 遍历整个棋盘，
+         * 将所有与进攻点或者是防守点有关联的点位，都拿来进一步判断，作为预选点位
+         * 判断预选点位是否能与自身角色形成棋形
+         * 是，则添加进相应棋形的列表中
+         * 否，则添加进邻居列表中
+         */
         for (let i = 0; i < board.length; i++) {
             for (let j = 0; j < board.length; j++) {
                 if (board[i][j] == R.empty) {
-
                     if (this.allSteps.length < 6) {
                         if (!this.hasNeighbor(i, j, 1, 1)) continue
                     } else if (!this.hasNeighbor(i, j, 2, 2)) continue
@@ -400,14 +441,11 @@ class Board {
                      * 那么极少数情况，进攻路线无法连成一条折线呢?很简单，我们对前双方两步不作star限制就好，这样可以 兼容一条折线中间伸出一段的情况
                      */
                     if (starSpread && config.star) {
-                        let roleScore = role === R.com ? p.scoreCom : p.scoreHum
-                        let deRoleScore = role === R.com ? p.scoreHum : p.scoreCom
-
-                        if (maxScore >= S.FOUR) {} else if (maxScore >= S.BLOCKED_FOUR && starTo(this.currentSteps[this.currentSteps.length - 1])) {
+                        if (maxScore >= S.FOUR) {}
+                        else if (maxScore >= S.BLOCKED_FOUR && starTo(this.currentSteps[this.currentSteps.length - 1])) {
                             //star 路径不是很准，所以考虑冲四防守对手最后一步的棋
-                        } else if (
-                            starTo(p, attackPoints) || starTo(p, defendPoints)
-                        ) {} else {
+                        } else if (starTo(p, attackPoints) || starTo(p, defendPoints)) {}
+                        else {
                             count++
                             continue
                         }
