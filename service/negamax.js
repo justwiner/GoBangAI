@@ -15,6 +15,7 @@ let count = 0, //每次思考的节点数
     cacheGet = 0 //zobrist缓存命中数量
 
 let start = 0
+let Cache = {}
 
 function cache(deep, score) {
     if (!config.cache) return false
@@ -160,11 +161,11 @@ function maxMinSearch(deep, alpha, beta, role, step, steps, spread) {
 
 /**
  * 负极大值搜索
- * @param {*} candidates
- * @param {*} role
- * @param {*} deep
- * @param {*} alpha
- * @param {*} beta
+ * @param {*} candidates 预选棋子的引用
+ * @param {*} role 角色
+ * @param {*} deep 深度
+ * @param {*} alpha 极大值
+ * @param {*} beta 极小值
  * @returns
  */
 function negamax(candidates, role, deep, alpha, beta) {
@@ -220,6 +221,7 @@ function negamax(candidates, role, deep, alpha, beta) {
  */
 function deeping(candidates, role, deep) {
     start = (+new Date())
+    Cache = {} // 每次开始迭代的时候清空缓存。这里缓存的主要目的是在每一次的时候加快搜索，而不是长期存储。事实证明这样的清空方式对搜索速度的影响非常小（小于10%)
     let bestScore = 0
     /**
      * 层数类似与人脑思考的步数，
@@ -276,7 +278,7 @@ function deeping(candidates, role, deep) {
     board.log()
     // config.log && console.log("===============统计表===============")
     // config.debug && statistic.print(candidates)
-    
+
     return result
 }
 

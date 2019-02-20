@@ -192,7 +192,7 @@ class Board {
 
         function update(x, y, dir) {
             let role = self.board[x][y]
-            // 不是对手的棋子
+            // 己方的棋子
             if (role !== R.reverse(R.com)) {
                 let cs = scorePoint(self, x, y, R.com, dir)
                 self.comScore[x][y] = cs
