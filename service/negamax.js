@@ -15,7 +15,6 @@ let count = 0, //每次思考的节点数
     cacheGet = 0 //zobrist缓存命中数量
 
 let start = 0
-let Cache = {}
 
 function cache(deep, score) {
     if (!config.cache) return false
@@ -35,6 +34,18 @@ function cache(deep, score) {
     cacheCount++
 }
 
+/**
+ * 极大极小值搜索
+ *
+ * @param {*} deep
+ * @param {*} alpha
+ * @param {*} beta
+ * @param {*} role
+ * @param {*} step
+ * @param {*} steps
+ * @param {*} spread
+ * @returns
+ */
 function maxMinSearch(deep, alpha, beta, role, step, steps, spread) {
     config.debug && board.logSteps()
     if (config.cache) {
@@ -67,41 +78,15 @@ function maxMinSearch(deep, alpha, beta, role, step, steps, spread) {
         step: step,
         steps: steps
     }
-    // 思考次数+1（递归次数）
+    // 每次思考的节点数+1（递归次数）
     count++
-    // 搜索到底 或者已经胜利
-    // 注意这里是小于0，而不是1，因为本次直接返回结果并没有下一步棋
+    /**
+     * 当搜索到底时，或者
+     * 己方分数已经大于连五的分数或对手分数大于连五的分数时
+     * 直接返回结果
+     * 注意这里是小于0，而不是1，因为本次直接返回结果并没有下一步棋
+     */
     if (deep <= 0 || math.greatOrEqualThan(_e, SCORE.FIVE) || math.littleOrEqualThan(_e, -SCORE.FIVE)) {
-        //// 经过测试，把算杀放在对子节点的搜索之后，比放在前面速度更快一些。
-        //// vcf
-        //// 自己没有形成活四，对面也没有形成活四，那么先尝试VCF
-        //if(math.littleThan(_e, SCORE.FOUR) && math.greatThan(_e, SCORE.FOUR * -1)) {
-        //  mate = vcx.vcf(role, vcxDeep)
-        //  if(mate) {
-        //    config.debug && console.log('vcf success')
-        //    v = {
-        //      score: mate.score,
-        //      step: step + mate.length,
-        //      steps: steps,
-        //      vcf: mate // 一个标记为，表示这个值是由vcx算出的
-        //    }
-        //    return v
-        //  }
-        //} // vct
-        //// 自己没有形成活三，对面也没有高于活三的棋型，那么尝试VCT
-        //if(math.littleThan(_e, SCORE.THREE*2) && math.greatThan(_e, SCORE.THREE * -2)) {
-        //  let mate = vcx.vct(role, vcxDeep)
-        //  if(mate) {
-        //    config.debug && console.log('vct success')
-        //    v = {
-        //      score: mate.score,
-        //      step: step + mate.length,
-        //      steps: steps,
-        //      vct: mate // 一个标记为，表示这个值是由vcx算出的
-        //    }
-        //  return v
-        //  }
-        //}
         return leaf
     }
 
@@ -110,14 +95,20 @@ function maxMinSearch(deep, alpha, beta, role, step, steps, spread) {
         step: step,
         steps: steps
     }
-    // 双方个下两个子之后，开启star spread 模式
+    /**
+     * 双方各下两个子之后，step > 1, 开启star spread 模式
+     * 当总棋子数大于10后，仅返回大于等于活三的预选棋子列表，活二与邻居棋子列表忽略不计
+     */
     let points = board.gen(role, board.count > 10 ? step > 1 : step > 3, step > 1)
-
+    // 预选棋子数为0，则返回当前叶子节点
     if (!points.length) return leaf
 
     config.debug && console.log('points:' + points.map((d) => '[' + d[0] + ',' + d[1] + ']').join(','))
     config.debug && console.log('A~B: ' + alpha + '~' + beta)
-
+    /**
+     * 1. 遍历预选棋子列表
+     * 2. 将预选棋子添加进棋盘中
+     */
     for (let i = 0; i < points.length; i++) {
         let p = points[i]
         board.put(p, role)
@@ -133,11 +124,6 @@ function maxMinSearch(deep, alpha, beta, role, step, steps, spread) {
                 _deep += 2
                 _spread++
             }
-            // 单步延伸策略：双三延伸
-            //if ( (role == R.com && p.scoreCom >= SCORE.THREE * 2) || (role == R.hum && p.scoreHum >= SCORE.THREE*2)) {
-            //  _deep = deep
-            //  _spread ++
-            //}
         }
 
         let _steps = steps.slice(0)
@@ -172,6 +158,15 @@ function maxMinSearch(deep, alpha, beta, role, step, steps, spread) {
     return best
 }
 
+/**
+ * 负极大值搜索
+ * @param {*} candidates
+ * @param {*} role
+ * @param {*} deep
+ * @param {*} alpha
+ * @param {*} beta
+ * @returns
+ */
 function negamax(candidates, role, deep, alpha, beta) {
     count = 0
     ABcut = 0
@@ -208,23 +203,25 @@ function negamax(candidates, role, deep, alpha, beta) {
     return alpha
 }
 
+/**
+ * 迭代加深优化
+ * 从2层开始，逐步增加搜索深度，直到找到胜利走法或者达到深度限制为止
+ * 比如我们搜索6层深度，那么我们先尝试2层，如果没有找到能赢的走法，再尝试4层，最后尝试6层。
+ * 我们只尝试偶数层。因为奇数层其实是电脑比玩家多走了一步，忽视了玩家的防守，并不会额外找到更好的解法。
+ * 
+ * @param {*} candidates 启发式排序函数的结果
+ * @param {*} role 角色
+ * @param {*} deep 搜索深度
+ * @returns
+ */
 function deeping(candidates, role, deep) {
     start = (+new Date())
-    Cache = {} // 每次开始迭代的时候清空缓存。这里缓存的主要目的是在每一次的时候加快搜索，而不是长期存储。事实证明这样的清空方式对搜索速度的影响非常小（小于10%)
-
     let bestScore = 0
     for (let i = 2; i <= deep; i += 2) {
         bestScore = negamax(candidates, role, i, MIN, MAX)
-        //// 每次迭代剔除必败点，直到没有必败点或者只剩最后一个点
-        //// 实际上，由于必败点几乎都会被AB剪枝剪掉，因此这段代码几乎不会生效
-        //let newCandidates = candidates.filter(function (d) {
-        //  return !d.abcut
-        //})
-        //candidates = newCandidates.length ? newCandidates : [candidates[0]] // 必败了，随便走走
 
-        if (math.greatOrEqualThan(bestScore, SCORE.FIVE)) break // 能赢了
-        // 下面这样做，会导致上一层的分数，在这一层导致自己被剪枝的bug，因为我们的判断条件是 >=， 上次层搜到的分数，在更深一层搜索的时候，会因为满足 >= 的条件而把自己剪枝掉
-        // if (math.littleThan(bestScore, T.THREE * 2)) bestScore = MIN // 如果能找到双三以上的棋，则保留bestScore做剪枝，否则直接设置为最小值
+        if (math.greatOrEqualThan(bestScore, SCORE.FIVE))
+            break // 能赢了
     }
 
     // 美化一下
