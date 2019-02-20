@@ -287,7 +287,7 @@ class Board {
      * 评估函数
      * 这里只算当前分，而不是在空位下一步之后的分
      * @param {*} role
-     * @returns
+     * @returns 电脑得分与对手得分的差值，若角色是电脑则不变，角色是对手则是相反数
      * @memberof Board
      */
     evaluate(role) {
