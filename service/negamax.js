@@ -50,7 +50,12 @@ function maxMinSearch(deep, alpha, beta, role, step, steps, spread) {
     if (config.cache) {
         let c = Cache[board.zobrist.code]
         if (c) {
-            if (c.deep >= deep) { // 如果缓存中的结果搜索深度不比当前小，则结果完全可用
+            /**
+             * 如果缓存中的结果搜索深度大于等于当前深度，则结果完全可用
+             * 毕竟缓存的深度大于即将搜索的深度，
+             * 说明缓存的子节点的父节点（即即将搜索的兄弟节点），后者则无需计算
+             */
+            if (c.deep >= deep) {
                 cacheGet++
                 // 记得clone，因为这个分数会在搜索过程中被修改，会使缓存中的值不正确
                 return {
@@ -60,7 +65,7 @@ function maxMinSearch(deep, alpha, beta, role, step, steps, spread) {
                     c: c
                 }
             } else {
-                // 如果缓存的结果中搜索深度比当前小，那么任何一方出现双三及以上结果的情况下可用
+                // 如果缓存的结果中搜索深度比当前小，那么缓存中的任何一方出现活四及以上结果的情况下，则此节点无需向下计算，直接返回结果
                 // TODO: 只有这一个缓存策略是会导致开启缓存后会和以前的结果有一点点区别的，其他几种都是透明的缓存策略
                 if (math.greatOrEqualThan(c.score, SCORE.FOUR) || math.littleOrEqualThan(c.score, -SCORE.FOUR)) {
                     cacheGet++
@@ -156,7 +161,7 @@ function maxMinSearch(deep, alpha, beta, role, step, steps, spread) {
 
         /**
          * alpha&beta剪枝
-         * 满足条件为  *alpha <= score <= beta* 即为可用路径
+         * 满足条件为  *alpha < score < beta* 即为可用路径
          */
         // 注意，这里决定了剪枝时使用的值必须比MAX小
         if (v.score > best.score) {
@@ -170,7 +175,7 @@ function maxMinSearch(deep, alpha, beta, role, step, steps, spread) {
         // 一定要注意，这里必须是 greatThan 即 明显大于，而不是 greatOrEqualThan 不然会出现很多差不多的有用分支被剪掉，会出现致命错误
         /**
          * 如果当前分数大于最小上限 beta，
-         * 即不满足 *score <= beta*
+         * 即不满足 *score < beta*
          * 则进行剪枝
          */
         if (math.greatOrEqualThan(v.score, beta)) {
