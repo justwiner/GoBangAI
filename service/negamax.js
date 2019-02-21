@@ -9,12 +9,10 @@ const MAX = SCORE.FIVE * 10
 const MIN = -1 * MAX
 
 let count = 0, //每次思考的节点数
-    PVcut = 0,
     ABcut = 0, //AB剪枝次数
     cacheCount = 0, //zobrist缓存节点数
     cacheGet = 0 //zobrist缓存命中数量
 
-let start = 0
 let Cache = {}
 
 function cache(deep, score) {
@@ -73,13 +71,18 @@ function maxMinSearch(deep, alpha, beta, role, step, steps, spread) {
     }
     // 此处对当前棋盘，针对当前角色进行估分
     let _e = board.evaluate(role)
-
+    /**
+     * 考虑到，
+     * 若当前棋路造成的棋局，在当前角色方的分数大于等于连五的分数，或者
+     * 当前已经遍历到最大深度，
+     * 则将此叶子节点信息返回给父节点
+     */
     let leaf = {
         score: _e,
         step: step,
         steps: steps
     }
-    // 每次思考的节点数+1（递归次数）
+    // 每次思考的节点数+1
     count++
     /**
      * 当搜索到底时，或者
@@ -101,48 +104,75 @@ function maxMinSearch(deep, alpha, beta, role, step, steps, spread) {
      * 当总棋子数大于10后，仅返回大于等于活三的预选棋子列表，活二与邻居棋子列表忽略不计
      */
     let points = board.gen(role, board.count > 10 ? step > 1 : step > 3, step > 1)
-    // 预选棋子数为0，则返回当前叶子节点
+    // 若叶子节点数为0，则返回当前叶子节点信息给父节点
     if (!points.length) return leaf
 
     config.debug && console.log('points:' + points.map((d) => '[' + d[0] + ',' + d[1] + ']').join(','))
     config.debug && console.log('A~B: ' + alpha + '~' + beta)
     /**
-     * 1. 遍历预选棋子列表
-     * 2. 将预选棋子添加进棋盘中
+     * 1. 遍历子节点
+     * 2. 并将子节点添加进棋盘中，用于叶子节点对棋局进行估分
      */
     for (let i = 0; i < points.length; i++) {
         let p = points[i]
+        // 将叶子节点信息添加进棋盘对象
         board.put(p, role)
-
+        // 遍历子节点时，搜索深度减一
         let _deep = deep - 1
 
+        // 冲四延伸判断次数起始值
         let _spread = spread
-
+        /**
+         * 冲四延伸判断次数限制为1，判断一次则*_spread++*
+         * 超出限制则不进行多余判断
+        */
         if (_spread < config.spreadLimit) {
-            // 冲四延伸
+            /**
+             * 冲四延伸
+             * 若对手在此位置的分数大于等于连五的分数
+             * 则增加搜索深度
+             */
             if ((role == Role.com && p.scoreHum >= SCORE.FIVE) || (role == Role.hum && p.scoreCom >= SCORE.FIVE)) {
                 // _deep = deep+1
                 _deep += 2
                 _spread++
             }
         }
-
+        // 进行克隆，避免被修改
         let _steps = steps.slice(0)
+        // 将当前子节点添加进路径列表中
         _steps.push(p)
+        /**
+         * 由于评估函数对于对手的评估是负数，
+         * 即负得越多，对手优势越大
+         * 因此，alpha&beta剪枝的判断范围需要取相反数，并且交换上下限
+         * 由于MAX层与MIN层是交替的，
+         * 所以可以共用此调用方式
+         */
         let v = maxMinSearch(_deep, -beta, -alpha, Role.reverse(role), step + 1, _steps, _spread)
         v.score *= -1
+        // 在思考完一条路径之后，需要将此棋子移除，用于思考另一条路径
         board.remove(p)
 
-
+        /**
+         * alpha&beta剪枝
+         * 满足条件为  *alpha <= score <= beta* 即为可用路径
+         */
         // 注意，这里决定了剪枝时使用的值必须比MAX小
         if (v.score > best.score) {
             best = v
         }
+        // 在选取最大下限（alpha）时，由于下限需要不断提高，因此选择较大值作为新的alpha
         alpha = Math.max(best.score, alpha)
-        //AB 剪枝
+        // beta 剪枝
         // 这里不要直接返回原来的值，因为这样上一层会以为就是这个分，实际上这个节点直接剪掉就好了，根本不用考虑，也就是直接给一个很大的值让他被减掉
         // 这样会导致一些差不多的节点都被剪掉，但是没关系，不影响棋力
         // 一定要注意，这里必须是 greatThan 即 明显大于，而不是 greatOrEqualThan 不然会出现很多差不多的有用分支被剪掉，会出现致命错误
+        /**
+         * 如果当前分数大于最小上限 beta，
+         * 即不满足 *score <= beta*
+         * 则进行剪枝
+         */
         if (math.greatOrEqualThan(v.score, beta)) {
             config.debug && console.log('AB Cut [' + p[0] + ',' + p[1] + ']' + v.score + ' >= ' + beta + '')
             ABcut++
@@ -164,31 +194,31 @@ function maxMinSearch(deep, alpha, beta, role, step, steps, spread) {
  * @param {*} candidates 预选棋子的引用
  * @param {*} role 角色
  * @param {*} deep 深度
- * @param {*} alpha 极大值
- * @param {*} beta 极小值
+ * @param {*} alpha *最大下限*，即搜索到的最好值，任何比它更小的值就没用了
+ * @param {*} beta *最小上线*，即对于对手来说最坏的值
  * @returns
  */
 function negamax(candidates, role, deep, alpha, beta) {
     count = 0
-    ABcut = 0
-    PVcut = 0
+    ABcut = 0 // alpha beta 剪枝数
     board.currentSteps = []
 
     for (let i = 0; i < candidates.length; i++) {
+        // 此时是搜索第一步，将预选棋子作为第一步，添加进棋盘
         let p = candidates[i]
         board.put(p, role)
         let steps = [p]
+        /**
+         * 这里进行负极大值搜索
+         * 由于之前走了第一步
+         * 则下一层是对手棋子，分数与alpha、beta取相反数
+         */
         let v = maxMinSearch(deep - 1, -beta, -alpha, Role.reverse(role), 1, steps.slice(0), 0)
         v.score *= -1
         alpha = Math.max(alpha, v.score)
         board.remove(p)
         p.v = v
 
-        // 超时判定
-        if ((+new Date()) - start > config.timeLimit * 1000) {
-            console.log('timeout...')
-            break // 超时，退出循环
-        }
     }
 
     config.log && console.log('迭代完成,deep=' + deep)
@@ -220,7 +250,6 @@ function negamax(candidates, role, deep, alpha, beta) {
  * @returns
  */
 function deeping(candidates, role, deep) {
-    start = (+new Date())
     Cache = {} // 每次开始迭代的时候清空缓存。这里缓存的主要目的是在每一次的时候加快搜索，而不是长期存储。事实证明这样的清空方式对搜索速度的影响非常小（小于10%)
     let bestScore = 0
     /**
@@ -232,7 +261,7 @@ function deeping(candidates, role, deep) {
      */
     // 传入的预选棋子列表的引用，在负极大值搜索之后，会赋予路径、分数与是否构成棋形的信息
     for (let i = 2; i <= deep; i += 2) {
-        // 拿取到搜索结果分数
+        // 拿取到负极大值算法搜索结果分数
         bestScore = negamax(candidates, role, i, MIN, MAX)
         // 若此分数大于连五的分数，则不再搜索
         if (math.greatOrEqualThan(bestScore, SCORE.FIVE))
@@ -270,11 +299,10 @@ function deeping(candidates, role, deep) {
 
     result.min = Math.min.apply(Math, result.steps.map(d => d.score))
     config.log && console.log("选择节点：" + candidates[0] + ", 分数:" + result.score.toFixed(3) + ", 步数:" + result.step + ', 最小值：' + result.min)
-    let time = (new Date() - start) / 1000
-    config.log && console.log('搜索节点数:' + count + ',AB剪枝次数:' + ABcut + ', PV剪枝次数:' + PVcut)
+    config.log && console.log('搜索节点数:' + count + ',AB剪枝次数:' + ABcut)
     config.log && console.log('搜索缓存:' + '总数 ' + cacheCount + ', 命中率 ' + (cacheGet / cacheCount * 100).toFixed(3) + '%, ' + cacheGet + '/' + cacheCount)
     //注意，减掉的节点数实际远远不止 ABcut 个，因为减掉的节点的子节点都没算进去。实际 4W个节点的时候，剪掉了大概 16W个节点
-    config.log && console.log('当前统计：' + count + '个节点, 耗时:' + time.toFixed(2) + 's, NPS:' + Math.floor(count / time) + 'N/S')
+    config.log && console.log('当前统计：' + count + '个节点,NPS:' + Math.floor(count / time) + 'N/S')
     board.log()
     // config.log && console.log("===============统计表===============")
     // config.debug && statistic.print(candidates)
