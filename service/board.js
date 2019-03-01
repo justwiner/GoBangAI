@@ -375,8 +375,8 @@ class Board {
             while (i >= 0) {
                 let p = this.currentSteps[i]
                 // 如果对手角色在此位置的分数大于活三的分数，则进行防守
-                if (reverseRole === R.white && p.scoreCom >= S.THREE ||
-                    reverseRole === R.black && p.scoreHum >= S.THREE) {
+                if (reverseRole === R.white && p.scoreWhite >= S.THREE ||
+                    reverseRole === R.black && p.scoreBlack >= S.THREE) {
                     // 将满足条件的点添加进防守点
                     defendPoints.push(p)
                     break
@@ -390,8 +390,8 @@ class Board {
             while (i >= 0) {
                 let p = this.currentSteps[i]
                 // 如果自己在此位置的分数大于活三的分数，则进行进攻
-                if (role === R.white && p.scoreCom >= S.THREE ||
-                    role === R.black && p.scoreHum >= S.THREE) {
+                if (role === R.white && p.scoreWhite >= S.THREE ||
+                    role === R.black && p.scoreBlack >= S.THREE) {
                     // 将满足条件的点添加进进攻点
                     attackPoints.push(p)
                     break;
@@ -434,15 +434,15 @@ class Board {
                         if (!this.hasNeighbor(i, j, 1, 1)) continue
                     } else if (!this.hasNeighbor(i, j, 2, 2)) continue
 
-                    let scoreHum = this.blackScore[i][j]
-                    let scoreCom = this.whiteScore[i][j]
-                    let maxScore = Math.max(scoreCom, scoreHum)
+                    let scoreBlack = this.blackScore[i][j]
+                    let scoreWhite = this.whiteScore[i][j]
+                    let maxScore = Math.max(scoreWhite, scoreBlack)
 
                     if (onlyThrees && maxScore < S.THREE) continue
 
                     let p = [i, j]
-                    p.scoreHum = scoreHum
-                    p.scoreCom = scoreCom
+                    p.scoreBlack = scoreBlack
+                    p.scoreWhite = scoreWhite
                     p.score = maxScore
                     p.role = role
                     // 预选点位总数+1
@@ -465,31 +465,31 @@ class Board {
                         }
                     }
 
-                    if (scoreCom >= S.FIVE) { //先看电脑能不能连成5
+                    if (scoreWhite >= S.FIVE) { //先看电脑能不能连成5
                         fives.push(p)
-                    } else if (scoreHum >= S.FIVE) { //再看玩家能不能连成5
+                    } else if (scoreBlack >= S.FIVE) { //再看玩家能不能连成5
                         //别急着返回，因为遍历还没完成，说不定电脑自己能成五。
                         fives.push(p)
-                    } else if (scoreCom >= S.FOUR) {
+                    } else if (scoreWhite >= S.FOUR) {
                         whitefours.push(p)
-                    } else if (scoreHum >= S.FOUR) {
+                    } else if (scoreBlack >= S.FOUR) {
                         blackfours.push(p)
-                    } else if (scoreCom >= S.BLOCKED_FOUR) {
+                    } else if (scoreWhite >= S.BLOCKED_FOUR) {
                         whiteblockedfours.push(p)
-                    } else if (scoreHum >= S.BLOCKED_FOUR) {
+                    } else if (scoreBlack >= S.BLOCKED_FOUR) {
                         blackblockedfours.push(p)
-                    } else if (scoreCom >= 2 * S.THREE) {
+                    } else if (scoreWhite >= 2 * S.THREE) {
                         //能成双三也行
                         whitetwothrees.push(p)
-                    } else if (scoreHum >= 2 * S.THREE) {
+                    } else if (scoreBlack >= 2 * S.THREE) {
                         blacktwothrees.push(p)
-                    } else if (scoreCom >= S.THREE) {
+                    } else if (scoreWhite >= S.THREE) {
                         whitethrees.push(p)
-                    } else if (scoreHum >= S.THREE) {
+                    } else if (scoreBlack >= S.THREE) {
                         blackthrees.push(p)
-                    } else if (scoreCom >= S.TWO) {
+                    } else if (scoreWhite >= S.TWO) {
                         whitetwos.unshift(p)
-                    } else if (scoreHum >= S.TWO) {
+                    } else if (scoreBlack >= S.TWO) {
                         blacktwos.unshift(p)
                     } else neighbors.push(p)
                 }
