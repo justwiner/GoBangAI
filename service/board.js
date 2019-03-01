@@ -105,8 +105,8 @@ class Board {
         // statistic.init(size)
 
         // 初始化双方得分情况（二维数组方式）
-        this.comScore = array.create(size, size)
-        this.humScore = array.create(size, size)
+        this.whiteScore = array.create(size, size)
+        this.blackScore = array.create(size, size)
 
         // scoreCache[role][dir][row][column]
         this.scoreCache = [
@@ -158,20 +158,20 @@ class Board {
                      */
                     if (this.hasNeighbor(i, j, 2, 2)) {
                         // 获取电脑在此落子点的分数
-                        let cs = scorePoint(this, i, j, R.com)
+                        let cs = scorePoint(this, i, j, R.white)
                         // 获取对方在此落子点的分数
-                        let hs = scorePoint(this, i, j, R.hum)
+                        let hs = scorePoint(this, i, j, R.black)
                         // 将分数分别保存下来
-                        this.comScore[i][j] = cs
-                        this.humScore[i][j] = hs
+                        this.whiteScore[i][j] = cs
+                        this.blackScore[i][j] = hs
                     }
 
-                } else if (board[i][j] == R.com) { // 对电脑打分，玩家此位置分数为0
-                    this.comScore[i][j] = scorePoint(this, i, j, R.com)
-                    this.humScore[i][j] = 0
-                } else if (board[i][j] == R.hum) { // 对玩家打分，电脑位置分数为0
-                    this.humScore[i][j] = scorePoint(this, i, j, R.hum)
-                    this.comScore[i][j] = 0
+                } else if (board[i][j] == R.white) { // 对电脑打分，玩家此位置分数为0
+                    this.whiteScore[i][j] = scorePoint(this, i, j, R.white)
+                    this.blackScore[i][j] = 0
+                } else if (board[i][j] == R.black) { // 对玩家打分，电脑位置分数为0
+                    this.blackScore[i][j] = scorePoint(this, i, j, R.black)
+                    this.whiteScore[i][j] = 0
                 }
             }
         }
@@ -186,24 +186,23 @@ class Board {
      */
     updateScore(p) {
         let radius = 4,
-            board = this.board,
             self = this,
             len = this.board.length
 
         function update(x, y, dir) {
             let role = self.board[x][y]
             // 己方的棋子
-            if (role !== R.reverse(R.com)) {
-                let cs = scorePoint(self, x, y, R.com, dir)
-                self.comScore[x][y] = cs
+            if (role !== R.reverse(R.white)) {
+                let cs = scorePoint(self, x, y, R.white, dir)
+                self.whiteScore[x][y] = cs
                 // statistic.table[x][y] += cs
-            } else self.comScore[x][y] = 0
+            } else self.whiteScore[x][y] = 0
             // 是对手的棋子
-            if (role !== R.reverse(R.hum)) {
-                let hs = scorePoint(self, x, y, R.hum, dir)
-                self.humScore[x][y] = hs
+            if (role !== R.reverse(R.black)) {
+                let hs = scorePoint(self, x, y, R.black, dir)
+                self.blackScore[x][y] = hs
                 // statistic.table[x][y] += hs
-            } else self.humScore[x][y] = 0
+            } else self.blackScore[x][y] = 0
 
         }
         // 无论是不是空位 都需要更新
@@ -292,26 +291,26 @@ class Board {
      */
     evaluate(role) {
         // 这里都是用正整数初始化的，所以初始值是0
-        this.comMaxScore = 0
-        this.humMaxScore = 0
+        this.whiteMaxScore = 0
+        this.blackMaxScore = 0
         // 拿取到当前棋盘的引用
         let board = this.board
         //遍历出最高分，开销不大
         // L：得到当前棋盘，我方和敌方的总分
         for (let i = 0; i < board.length; i++) {
             for (let j = 0; j < board[i].length; j++) {
-                if (board[i][j] == R.com) {
-                    this.comMaxScore += fixScore(this.comScore[i][j])
-                } else if (board[i][j] == R.hum) {
-                    this.humMaxScore += fixScore(this.humScore[i][j])
+                if (board[i][j] == R.white) {
+                    this.whiteMaxScore += fixScore(this.whiteScore[i][j])
+                } else if (board[i][j] == R.black) {
+                    this.blackMaxScore += fixScore(this.blackScore[i][j])
                 }
             }
         }
         // 有冲四延伸了，不需要专门处理冲四活三
         // 不过这里做了这一步，可以减少电脑胡乱冲四的毛病
-        //this.comMaxScore = fixScore(this.comMaxScore)
-        //this.humMaxScore = fixScore(this.humMaxScore)
-        let result = (role == R.com ? 1 : -1) * (this.comMaxScore - this.humMaxScore)
+        //this.whiteMaxScore = fixScore(this.whiteMaxScore)
+        //this.blackMaxScore = fixScore(this.blackMaxScore)
+        let result = (role == R.white ? 1 : -1) * (this.whiteMaxScore - this.blackMaxScore)
         return result
     }
 
@@ -347,16 +346,16 @@ class Board {
         // 如果棋盘为空，则默认下最中间的位置
         if (this.count <= 0) return [[7, 7]]
         let fives = []
-        let comfours = []
-        let humfours = []
-        let comblockedfours = []
-        let humblockedfours = []
-        let comtwothrees = []
-        let humtwothrees = []
-        let comthrees = []
-        let humthrees = []
-        let comtwos = []
-        let humtwos = []
+        let whitefours = []
+        let blackfours = []
+        let whiteblockedfours = []
+        let blackblockedfours = []
+        let whitetwothrees = []
+        let blacktwothrees = []
+        let whitethrees = []
+        let blackthrees = []
+        let whitetwos = []
+        let blacktwos = []
         let neighbors = []
 
         let board = this.board
@@ -376,8 +375,8 @@ class Board {
             while (i >= 0) {
                 let p = this.currentSteps[i]
                 // 如果对手角色在此位置的分数大于活三的分数，则进行防守
-                if (reverseRole === R.com && p.scoreCom >= S.THREE ||
-                    reverseRole === R.hum && p.scoreHum >= S.THREE) {
+                if (reverseRole === R.white && p.scoreCom >= S.THREE ||
+                    reverseRole === R.black && p.scoreHum >= S.THREE) {
                     // 将满足条件的点添加进防守点
                     defendPoints.push(p)
                     break
@@ -391,8 +390,8 @@ class Board {
             while (i >= 0) {
                 let p = this.currentSteps[i]
                 // 如果自己在此位置的分数大于活三的分数，则进行进攻
-                if (role === R.com && p.scoreCom >= S.THREE ||
-                    role === R.hum && p.scoreHum >= S.THREE) {
+                if (role === R.white && p.scoreCom >= S.THREE ||
+                    role === R.black && p.scoreHum >= S.THREE) {
                     // 将满足条件的点添加进进攻点
                     attackPoints.push(p)
                     break;
@@ -435,8 +434,8 @@ class Board {
                         if (!this.hasNeighbor(i, j, 1, 1)) continue
                     } else if (!this.hasNeighbor(i, j, 2, 2)) continue
 
-                    let scoreHum = this.humScore[i][j]
-                    let scoreCom = this.comScore[i][j]
+                    let scoreHum = this.blackScore[i][j]
+                    let scoreCom = this.whiteScore[i][j]
                     let maxScore = Math.max(scoreCom, scoreHum)
 
                     if (onlyThrees && maxScore < S.THREE) continue
@@ -472,26 +471,26 @@ class Board {
                         //别急着返回，因为遍历还没完成，说不定电脑自己能成五。
                         fives.push(p)
                     } else if (scoreCom >= S.FOUR) {
-                        comfours.push(p)
+                        whitefours.push(p)
                     } else if (scoreHum >= S.FOUR) {
-                        humfours.push(p)
+                        blackfours.push(p)
                     } else if (scoreCom >= S.BLOCKED_FOUR) {
-                        comblockedfours.push(p)
+                        whiteblockedfours.push(p)
                     } else if (scoreHum >= S.BLOCKED_FOUR) {
-                        humblockedfours.push(p)
+                        blackblockedfours.push(p)
                     } else if (scoreCom >= 2 * S.THREE) {
                         //能成双三也行
-                        comtwothrees.push(p)
+                        whitetwothrees.push(p)
                     } else if (scoreHum >= 2 * S.THREE) {
-                        humtwothrees.push(p)
+                        blacktwothrees.push(p)
                     } else if (scoreCom >= S.THREE) {
-                        comthrees.push(p)
+                        whitethrees.push(p)
                     } else if (scoreHum >= S.THREE) {
-                        humthrees.push(p)
+                        blackthrees.push(p)
                     } else if (scoreCom >= S.TWO) {
-                        comtwos.unshift(p)
+                        whitetwos.unshift(p)
                     } else if (scoreHum >= S.TWO) {
-                        humtwos.unshift(p)
+                        blacktwos.unshift(p)
                     } else neighbors.push(p)
                 }
             }
@@ -501,43 +500,43 @@ class Board {
         if (fives.length) return fives
 
         // 自己能活四，则直接活四，不考虑冲四
-        if (role === R.com && comfours.length) return comfours
-        if (role === R.hum && humfours.length) return humfours
+        if (role === R.white && whitefours.length) return whitefours
+        if (role === R.black && blackfours.length) return blackfours
 
         // 对面有活四冲四，自己冲四都没，则只考虑对面活四 （此时对面冲四就不用考虑了)
 
-        if (role === R.com && humfours.length && !comblockedfours.length) return humfours
-        if (role === R.hum && comfours.length && !humblockedfours.length) return comfours
+        if (role === R.white && blackfours.length && !whiteblockedfours.length) return blackfours
+        if (role === R.black && whitefours.length && !blackblockedfours.length) return whitefours
 
         // 对面有活四自己有冲四，则都考虑下
-        let fours = role === R.com ? comfours.concat(humfours) : humfours.concat(comfours)
-        let blockedfours = role === R.com ? comblockedfours.concat(humblockedfours) : humblockedfours.concat(comblockedfours)
+        let fours = role === R.white ? whitefours.concat(blackfours) : blackfours.concat(whitefours)
+        let blockedfours = role === R.white ? whiteblockedfours.concat(blackblockedfours) : blackblockedfours.concat(whiteblockedfours)
         if (fours.length) return fours.concat(blockedfours)
 
         let result = []
-        if (role === R.com) {
+        if (role === R.white) {
             result =
-                comtwothrees
-                .concat(humtwothrees)
-                .concat(comblockedfours)
-                .concat(humblockedfours)
-                .concat(comthrees)
-                .concat(humthrees)
+                whitetwothrees
+                .concat(blacktwothrees)
+                .concat(whiteblockedfours)
+                .concat(blackblockedfours)
+                .concat(whitethrees)
+                .concat(blackthrees)
         }
-        if (role === R.hum) {
+        if (role === R.black) {
             result =
-                humtwothrees
-                .concat(comtwothrees)
-                .concat(humblockedfours)
-                .concat(comblockedfours)
-                .concat(humthrees)
-                .concat(comthrees)
+                blacktwothrees
+                .concat(whitetwothrees)
+                .concat(blackblockedfours)
+                .concat(whiteblockedfours)
+                .concat(blackthrees)
+                .concat(whitethrees)
         }
 
         // result.sort(function(a, b) { return b.score - a.score })
 
         //双三很特殊，因为能形成双三的不一定比一个活三强
-        if (comtwothrees.length || humtwothrees.length) {
+        if (whitetwothrees.length || blacktwothrees.length) {
             return result
         }
 
@@ -549,8 +548,8 @@ class Board {
 
 
         let twos
-        if (role === R.com) twos = comtwos.concat(humtwos)
-        else twos = humtwos.concat(comtwos)
+        if (role === R.white) twos = whitetwos.concat(blacktwos)
+        else twos = blacktwos.concat(whitetwos)
 
         twos.sort(function (a, b) {
             return b.score - a.score

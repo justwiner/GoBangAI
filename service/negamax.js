@@ -137,7 +137,7 @@ function maxMinSearch(deep, alpha, beta, role, step, steps, spread) {
              * 若对手在此位置的分数大于等于连五的分数
              * 则增加搜索深度
              */
-            if ((role == Role.com && p.scoreHum >= SCORE.FIVE) || (role == Role.hum && p.scoreCom >= SCORE.FIVE)) {
+            if ((role == Role.white && p.scoreHum >= SCORE.FIVE) || (role == Role.black && p.scoreCom >= SCORE.FIVE)) {
                 // _deep = deep+1
                 _deep += 2
                 _spread++
@@ -316,7 +316,7 @@ function deeping(candidates, role, deep) {
 }
 
 function deepAll(role, deep) {
-    role = role || Role.com
+    role = role || Role.white
     deep = deep === undefined ? config.searchDeep : deep
     const candidates = board.gen(role)
     return deeping(candidates, role, deep)

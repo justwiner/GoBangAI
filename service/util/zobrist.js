@@ -10,11 +10,11 @@ let Zobrist = function (size) {
 
 // 初始化自己和对手的hash值
 Zobrist.prototype.init = function () {
-    this.com = [];
-    this.hum = [];
+    this.white = [];
+    this.black = [];
     for (let i = 0; i < this.size * this.size; i++) {
-        this.com.push(this._rand());
-        this.hum.push(this._rand());
+        this.white.push(this._rand());
+        this.black.push(this._rand());
     }
 
     this.code = this._rand();
@@ -29,7 +29,7 @@ Zobrist.prototype._rand = function () {
 // 通过异或操作记录棋局
 Zobrist.prototype.go = function (x, y, role) {
     let index = this.size * x + y;
-    this.code ^= (role == R.com ? this.com[index] : this.hum[index]);
+    this.code ^= (role == R.white ? this.white[index] : this.black[index]);
     return this.code;
 }
 
